@@ -1,0 +1,10 @@
+# hdfs 数据上传者
+
+## test
+
+很简单的逻辑,第一次启动时会上传一次简单的结构化数据,之后定时会上传一次简单的结构化数据
+
+## 请注意pydoop的安装条件和依赖
+
+https://crs4.github.io/pydoop/installation.html
+

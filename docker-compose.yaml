@@ -1,0 +1,105 @@
+services:
+  # 自定义alpine等极小Image, 作为运行环境
+  golang-image:
+    build: 
+      context: ./images/golang
+      dockerfile: Dockerfile
+    image: my-golang-image  # 构建完成后的镜像名称
+
+  python-image:
+    build:
+      context: ./images/python
+      dockerfile: Dockerfile  
+    image: my-python-image
+
+  # HDFS handler 真正的hdfs数据生产者,从kafka中接收数据
+  hdfshandler-test:
+    build:
+      context: ./hdfs/handler
+      dockerfile: Dockerfile.test
+    profiles: ["test"]
+    container: hdfshandler_container
+    environment:
+      - HDFS_URI=hdfs://namenode:9000
+      - HDFS_PATH=/example/hadoop/uploads
+    depends_on:
+      golang-image:
+        condition: service_started
+      namenode:
+        condition: service_healthy
+
+  # HDFS NameNode
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - CORE_CONF_hadoop_http_staticuser_user=root
+      - HDFS_CONF_dfs_replication=2
+      - HDFS_CONF_dfs_permissions_enabled=false
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # HDFS API
+    volumes:
+      - ./data/namenode_data:/hadoop/dfs/name
+    networks:
+      - hadoop
+
+  # HDFS DataNode（支持横向扩展）
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - CORE_CONF_hadoop_http_staticuser_user=root
+      - HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
+    volumes:
+      - ./data/datanode_data:/hadoop/dfs/data
+    networks:
+      - hadoop
+    depends_on:
+      - namenode
+    deploy:
+      mode: replicated
+      replicas: 3  # 初始DataNode数量，可根据需要动态扩展
+
+  # MongoDB
+  mongodb:
+    image: mongo:8.0.1
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo:/data/db  # 持久化 MongoDB 数据
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    networks:
+      - hadoop
+    healthcheck:
+      test: ["CMD", "mongod", "--sysinfo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User服务，连接MongoDB
+  user-test:
+    build:
+      context: ./services/example
+      dockerfile: Dockerfile
+    profiles: ["test"]
+    container_name: user_service
+    environment:
+      - MONGO_URI=mongodb://root:root@mongodb:27017
+    depends_on:
+      - mongodb
+    networks:
+      - hadoop
+
+networks:
+  hadoop:
+    driver: bridge
+
+volumes:
+  namenode_data:
+  datanode_data:
+  mongo_data:

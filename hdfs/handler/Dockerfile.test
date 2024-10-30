@@ -1,0 +1,13 @@
+# 使用更小的基础镜像
+FROM python-image
+
+# 设置工作目录
+WORKDIR /root/
+
+COPY . .
+
+# 暴露应用的端口
+EXPOSE 8888
+
+# 运行应用, 会被docker-compose中的覆盖
+CMD ["python3", "main.py"]

@@ -1,0 +1,8 @@
+# 示例用户服务
+
+演示如何与hdfs,redis,mongodb这些数据源进行交互
+
+## logic
+
+### brief
+会定时与hdfs的某个表进行读取,并将读取到的数据经过某种处理传送到mongodb,同时通知更新redis

@@ -1,16 +1,33 @@
 services:
   # 自定义alpine等极小Image, 作为运行环境
-  golang-image:
-    build: 
-      context: ./images/golang
-      dockerfile: Dockerfile
-    image: my-golang-image  # 构建完成后的镜像名称
+  # golang-image:
+  #   build: 
+  #     context: ./images/golang
+  #     dockerfile: Dockerfile
+  #   image: my-golang-image  # 构建完成后的镜像名称
 
-  python-image:
+  kafka: 
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_BROKER_ID=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+
+  # Kafka Producer (random data generator)
+  kafka-producer:
     build:
-      context: ./images/python
-      dockerfile: Dockerfile  
-    image: my-python-image
+      context: ./hdfs/producer
+      dockerfile: Dockerfile  # Dockerfile for kafka_producer.py
+    container_name: kafka_producer
+    environment:
+      KAFKA_TOPIC: example-topic
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+    depends_on:
+      - kafka
 
   # HDFS handler 真正的hdfs数据生产者,从kafka中接收数据
   hdfshandler-test:
@@ -18,13 +35,13 @@ services:
       context: ./hdfs/handler
       dockerfile: Dockerfile.test
     profiles: ["test"]
-    container: hdfshandler_container
+    container_name: hdfshandler_container
     environment:
       - HDFS_URI=hdfs://namenode:9000
       - HDFS_PATH=/example/hadoop/uploads
+      - KAFKA_TOPIC=example-topic
+      - KAFKA_BOOTSTRAP_SERVER=KAFKA:9092
     depends_on:
-      golang-image:
-        condition: service_started
       namenode:
         condition: service_healthy
 
@@ -60,9 +77,9 @@ services:
       - hadoop
     depends_on:
       - namenode
-    deploy:
-      mode: replicated
-      replicas: 3  # 初始DataNode数量，可根据需要动态扩展
+    # deploy:
+    #   mode: replicated
+    #   replicas: 3  # 初始DataNode数量，可根据需要动态扩展
 
   # MongoDB
   mongodb:
@@ -81,7 +98,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # User服务，连接MongoDB
+  # User服务，连接hydoop and MongoDB
   user-test:
     build:
       context: ./services/example

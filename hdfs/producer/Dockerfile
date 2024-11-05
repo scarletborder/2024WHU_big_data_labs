@@ -1,5 +1,5 @@
 # 使用 Python 基础镜像
-FROM crs4/pydoop-base:3.2.0-3.7
+FROM python:3.9-slim
 
 WORKDIR /app
 

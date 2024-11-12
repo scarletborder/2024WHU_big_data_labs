@@ -6,28 +6,58 @@ services:
   #     dockerfile: Dockerfile
   #   image: my-golang-image  # 构建完成后的镜像名称
 
-  kafka: 
-    image: bitnami/kafka:latest
-    container_name: kafka
+ #============
+ # Kafka
+ # refer to https://github.com/xuqinghan/docker-kafka
+ #=============
+  zoo:
+    image: zookeeper:3.6
+    restart: always
+    hostname: zookeeper
+    volumes:
+      - ./data/zookeeper/data:/data
+      - ./data/zookeeper/datalog:/datalog
+      - /etc/localtime:/etc/localtime
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka
+    
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.5.0
+    restart: always
     environment:
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_CFG_BROKER_ID=1
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ZOOKEEPER_CONNECT=zoo:2181 
+      - KAFKA_ADVERTISED_HOST_NAME=KAFKA 
+      - KAFKA_ADVERTISED_PORT=9092
+    volumes:
+      - /etc/localtime:/etc/localtime
     ports:
       - "9092:9092"
+    depends_on:
+      - zoo
+    networks:
+      - kafka
 
   # Kafka Producer (random data generator)
-  kafka-producer:
+  producer:
+    stdin_open: true
+    tty: true
+    restart: always
     build:
       context: ./hdfs/producer
-      dockerfile: Dockerfile  # Dockerfile for kafka_producer.py
-    container_name: kafka_producer
-    environment:
-      KAFKA_TOPIC: example-topic
-      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+      dockerfile: Dockerfile
     depends_on:
+      - zoo
       - kafka
+    command: ['python3', 'main.py']
+    networks:
+      - kafka
+
+  # =================
+  # Hadoop
+  # =================
 
   # HDFS handler 真正的hdfs数据生产者,从kafka中接收数据
   hdfshandler-test:
@@ -41,6 +71,9 @@ services:
       - HDFS_PATH=/example/hadoop/uploads
       - KAFKA_TOPIC=example-topic
       - KAFKA_BOOTSTRAP_SERVER=KAFKA:9092
+    networks:
+      - kafka
+      - hadoop
     depends_on:
       namenode:
         condition: service_healthy
@@ -115,8 +148,10 @@ services:
 networks:
   hadoop:
     driver: bridge
+  kafka:
+    driver: bridge
 
-volumes:
-  namenode_data:
-  datanode_data:
-  mongo_data:
+# volumes:
+#   namenode_data:
+#   datanode_data:
+#   mongo_data:

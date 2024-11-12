@@ -12,6 +12,7 @@ KAFKA_BOOTSTRAP_SERVER = "kafka:9092"  # 替换为实际的 Kafka 服务器地�
 # Initialize Kafka producer
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+    api_version=(0, 10, 2),
     value_serializer=lambda v: v.encode("utf-8"),
 )
 

@@ -1,0 +1,143 @@
+networks:
+  hadoop:
+    driver: bridge
+  kafka_network:
+    driver: bridge
+services:
+  datanode:
+    depends_on:
+      namenode:
+        condition: service_started
+    environment:
+      CLUSTER_NAME: hadoop-cluster
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      CORE_CONF_hadoop_http_staticuser_user: root
+      HDFS_CONF_dfs_datanode_data_dir: file:///hadoop/dfs/data
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    networks:
+      hadoop: null
+    volumes:
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/data/datanode_data:/hadoop/dfs/data:rw
+  etcd:
+    container_name: etcd_container
+    environment:
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_NAME: etcd
+    image: bitnami/etcd:3.5.16
+    networks:
+      kafka_network: null
+    ports:
+    - published: 2379
+      target: 2379
+    volumes:
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/data/etcd:/data/etcd:rw
+  hdfshandler-test:
+    build:
+      context: /home/scarletborder/Codes/project/2024WHU_big_data_labs/hdfs/handler
+      dockerfile: Dockerfile.test
+    container_name: hdfshandler_container
+    depends_on:
+      namenode:
+        condition: service_healthy
+    environment:
+      HDFS_PATH: /example/hadoop/uploads
+      HDFS_URI: hdfs://namenode:9000
+      KAFKA_BOOTSTRAP_SERVER: KAFKA:9092
+      KAFKA_TOPIC: example-topic
+    networks:
+      hadoop: null
+      kafka_network: null
+    profiles:
+    - test
+  kafka:
+    command:
+    - /start-kafka.sh
+    container_name: kafka1
+    environment:
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_NODE_ID: '1'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_PROCESS_ROLES: broker,controller
+    image: bitnami/kafka:latest
+    networks:
+      kafka_network: null
+    ports:
+    - published: 9092
+      target: 9092
+    volumes:
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/data/kafka:/var/lib/kafka/data:rw
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/images/kafka/controller_start.sh:/start-kafka.sh:rw
+  kafka-producer:
+    build:
+      context: /home/scarletborder/Codes/project/2024WHU_big_data_labs/hdfs/producer
+      dockerfile: Dockerfile
+    container_name: kafka_producer
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+      KAFKA_TOPIC: example-topic
+    networks:
+      kafka_network: null
+  mongodb:
+    container_name: mongodb_container
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test:
+      - CMD
+      - mongod
+      - --sysinfo
+      timeout: 5s
+    image: mongo:8.0.1
+    networks:
+      hadoop: null
+    ports:
+    - published: 27017
+      target: 27017
+    volumes:
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/data/mongo:/data/db:rw
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:rw
+  namenode:
+    container_name: namenode
+    environment:
+      CLUSTER_NAME: hadoop-cluster
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      CORE_CONF_hadoop_http_staticuser_user: root
+      HDFS_CONF_dfs_permissions_enabled: "false"
+      HDFS_CONF_dfs_replication: '2'
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    networks:
+      hadoop: null
+    ports:
+    - published: 9870
+      target: 9870
+    - published: 9000
+      target: 9000
+    volumes:
+    - /home/scarletborder/Codes/project/2024WHU_big_data_labs/data/namenode_data:/hadoop/dfs/name:rw
+  user-test:
+    build:
+      context: /home/scarletborder/Codes/project/2024WHU_big_data_labs/services/example
+      dockerfile: Dockerfile
+    container_name: user_service
+    depends_on:
+      mongodb:
+        condition: service_started
+    environment:
+      MONGO_URI: mongodb://root:root@mongodb:27017
+    networks:
+      hadoop: null
+    profiles:
+    - test
+version: '3.9'
+volumes:
+  datanode_data: {}
+  mongo_data: {}
+  namenode_data: {}
+

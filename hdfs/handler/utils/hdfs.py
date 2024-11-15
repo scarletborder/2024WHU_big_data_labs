@@ -1,62 +1,47 @@
-# Utils about interact with hdfs
-
-from kafka import KafkaConsumer
+from io import StringIO
+import json
 import pydoop.hdfs as hdfs
-import csv
-import os
-import io
-
-# Kafka and HDFS configuration
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "example-topic")
-KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "kafka:9092")
-HDFS_PATH = os.getenv("HDFS_PATH", "/example/hadoop/uploads")
-
-# Initialize Kafka consumer
-consumer = KafkaConsumer(
-    KAFKA_TOPIC,
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-    auto_offset_reset="earliest",
-    enable_auto_commit=True,
-)
+from datetime import datetime
 
 
-def process_csv_data(csv_data):
-    """Process CSV data from each message and prepare for HDFS storage"""
-    csvfile = io.StringIO(csv_data)
-    reader = csv.reader(csvfile)
-    headers = next(reader)  # Assume first row is the header
+def HDFSUpload(city: str, csv_string: str):
+    # Split the CSV data into lines
+    lines = csv_string.strip().split("\n")
 
-    processed_data = []
-    for row in reader:
-        processed_data.append(dict(zip(headers, row)))
+    # Extract the headers
+    headers = lines[0].split(",")
+    headers = [_.strip() for _ in headers]
 
-    return processed_data
+    for line in lines[1:]:
+        values = line.split(",")
+        values = [_.strip() for _ in values]
+
+        # 假设date是0th 元素
+        time_str = values[0]
+        time_obj = datetime.strptime(time_str, "%Y-%m-%d.%H:%M:%S")
+        entry = {headers[i]: values[i] for i in range(len(headers))}
+        AppendJson(city, entry, time_obj)
+        ...
 
 
-def write_to_hdfs(data, file_name):
-    """Write data to HDFS in CSV format using Pydoop"""
-    file_path = f"{HDFS_PATH}/{file_name}"
-    with hdfs.open(file_path, "w") as writer:
-        writer.write(data)
+def AppendJson(city: str, entry: dict, time_obj: datetime):
+    hdfs_directory = (
+        f"/data/power_station/{city}/{time_obj.year}/{time_obj.month}/{time_obj.day}"
+    )
+    hdfs_file_path = f"{hdfs_directory}/{time_obj.hour}.csv"
 
+    # # 如果 HDFS 目录不存在，创建目录
+    # if not hdfs.path.exists(hdfs_directory):
+    #     hdfs.mkdir(hdfs_directory)
 
-if __name__ == "__main__":
-    print("Starting HDFS Handler with Pydoop...")
+    print(
+        f"""
+hdfs_directory{hdfs_directory}              
+hdfs_file_path:{hdfs_file_path}
+data:{entry}
+"""
+    )
 
-    for message in consumer:
-        csv_data = message.value.decode("utf-8")
-        print("Received CSV data")
-
-        processed_data = process_csv_data(csv_data)
-        file_name = (
-            f"data_{message.offset}.csv"  # Unique file name based on Kafka offset
-        )
-
-        # Convert processed data back to CSV format for HDFS storage
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=processed_data[0].keys())
-        writer.writeheader()
-        writer.writerows(processed_data)
-
-        write_to_hdfs(output.getvalue(), file_name)
-        print(f"Data written to HDFS at {HDFS_PATH}/{file_name}")
+    # # 将数据追加到基于城市和时间的 HDFS 文件中
+    # with hdfs.open(hdfs_file_path, 'at') as f:
+    # f.write(new_data + '\n')  # 每条数据以换行符结尾，确保数据格式正确

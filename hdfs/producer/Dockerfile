@@ -12,4 +12,4 @@ ENV PYTHONIOENCODING=utf-8
 # 复制生产者代码
 COPY . .
 
-CMD ["python", "main.py"]
+CMD ["python3", "test.py"]

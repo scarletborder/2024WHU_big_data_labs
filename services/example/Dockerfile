@@ -5,8 +5,9 @@ WORKDIR /app
 
 # 安装 kafka-python 依赖
 RUN pip install kafka-python
+RUN pip install pydoop
 
 # 复制生产者代码
 COPY . .
 
-CMD ["python3", "main.py"]
+CMD ["python3.7", "main.py"]

@@ -1,20 +1,49 @@
 from kafka import KafkaConsumer
 import json
+import os
+from utils.hdfs import *
+
+print("handler start...\n")
+
+# 连接 Kafka 的配置
+bootstrap_servers = "kafka:9092"
+group_id = (
+    "power-consumers"  # 消费者组 ID，确保所有消费者使用相同的组 ID 以实现负载均衡
+)
+
+# 创建 KafkaConsumer 实例
+consumer = KafkaConsumer(
+    "city",
+    bootstrap_servers=bootstrap_servers,
+    # group_id=group_id,
+    auto_offset_reset="earliest",  # 从最早的消息开始消费，适合初次启动时
+    enable_auto_commit=True,  # 自动提交偏移量，确保消息不重复消费
+    value_deserializer=lambda v: json.loads(v.decode("utf-8")),  # 反序列化 JSON 数据
+)
+
+# 使用正则表达式订阅所有符合 "city-*" 命名的 topic
+# consumer.subscribe(pattern="^city-.*")
 
 
-# Kafka configuration
-KAFKA_TOPIC = "example-topic"
-KAFKA_BOOTSTRAP_SERVER = "kafka:9092"  # 替换为实际的 Kafka 服务器地址
+def process_message(message):
+    """
+    处理消息的函数。在这里实现你处理每条消息的逻辑。
+    """
+    city = message.value.get("city")
+    data = message.value.get("data")
+    print(f"recv {data}")
+    HDFSUpload(city, data)
+    print(f"Processing data from city: {city}, data: {data}")
 
 
-if __name__ == "__main__":
-
-    consumer = KafkaConsumer(
-        KAFKA_TOPIC,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-    )
-    data = []
-    for msg in consumer:
-        info = msg.value.decode("utf-8")
-        data = json.loads(info)
-        print(data)
+# 消费消息
+try:
+    for message in consumer:
+        print(
+            f"Received message from Topic: {message.topic}, Partition: {message.partition}, Offset: {message.offset}"
+        )
+        process_message(message)
+except Exception as e:
+    print(f"Error processing message: {e}")
+finally:
+    consumer.close()

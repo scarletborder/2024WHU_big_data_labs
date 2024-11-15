@@ -49,11 +49,16 @@ services:
       context: ./hdfs/producer
       dockerfile: Dockerfile
     depends_on:
-      - zoo
-      - kafka
-    command: ['python3', 'main.py']
+      zoo:
+        condition: service_started
+      kafka:
+        condition: service_started
+      namenode:
+        condition: service_healthy
+    command: ['python3', 'test.py']
     networks:
       - kafka
+      
 
   # =================
   # Hadoop
@@ -75,6 +80,8 @@ services:
       - kafka
       - hadoop
     depends_on:
+      kafka:
+        condition: service_started
       namenode:
         condition: service_healthy
 
@@ -142,6 +149,8 @@ services:
       - MONGO_URI=mongodb://root:root@mongodb:27017
     depends_on:
       - mongodb
+      - namenode
+      - hdfshandler-test
     networks:
       - hadoop
 

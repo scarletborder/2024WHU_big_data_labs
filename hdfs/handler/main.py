@@ -2,6 +2,9 @@ from kafka import KafkaConsumer
 import json
 import os
 from utils.hdfs import *
+from server.start import start_fastapi_server
+from server.handler import Send_Data
+import threading
 
 print("handler start...\n")
 
@@ -30,20 +33,26 @@ def process_message(message):
     处理消息的函数。在这里实现你处理每条消息的逻辑。
     """
     city = message.value.get("city")
-    data = message.value.get("data")
-    print(f"recv {data}")
-    HDFSUpload(city, data)
+    data = message.value.get("data")  # json data which came from a dict
     print(f"Processing data from city: {city}, data: {data}")
+    # traverse from data handler
+    res = Send_Data(data)
+    print(res)
 
 
-# 消费消息
-try:
-    for message in consumer:
-        print(
-            f"Received message from Topic: {message.topic}, Partition: {message.partition}, Offset: {message.offset}"
-        )
-        process_message(message)
-except Exception as e:
-    print(f"Error processing message: {e}")
-finally:
-    consumer.close()
+if __name__ == "__main__":
+    # launch a fastapi server which allows to register data handler
+    fastapi_thread = threading.Thread(target=start_fastapi_server)
+    fastapi_thread.start()
+
+    # 消费消息
+    try:
+        for message in consumer:
+            print(
+                f"Received message from Topic: {message.topic}, Partition: {message.partition}, Offset: {message.offset}"
+            )
+            process_message(message)
+    except Exception as e:
+        print(f"Error processing message: {e}")
+    finally:
+        consumer.close()

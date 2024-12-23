@@ -1,16 +1,16 @@
 # 使用 Python 基础镜像
-FROM crs4/pydoop-base:3.2.0-3.7
+FROM python:3.9-bookworm
 
 WORKDIR /app
 
 # 安装 kafka-python 依赖
-RUN pip install kafka-python
-RUN pip install pydoop
+RUN pip install grpcio grpcio-tools grpcio-reflection googleapis-common-protos
 RUN pip install "fastapi[standard]"
 
 ENV PYTHONIOENCODING=utf-8
 
+
 # 复制生产者代码
 COPY . .
 
-CMD ["python3.7", "main.py"]
+CMD ["python3", "test.py"]

@@ -15,8 +15,4 @@ COPY . .
 
 # RUN ./summon_proto.sh
 
-RUN python grpc-server.py &
-
-RUN python http_server.py &
-
-CMD ["python", "main.py"]
+CMD ["sh","run.sh"]

@@ -1,3 +1,4 @@
+import json
 import requests
 import threading
 
@@ -5,14 +6,11 @@ HandlerList: list[str] = []
 Handler_lock = threading.Lock()
 
 
-def Send_Data(data: str):
+def Send_Data(data):
     with Handler_lock:
+        print(f"have {len(HandlerList)} handlers")
         for handler in HandlerList:
-            response = requests.post(
-                handler + "/send",
-                data=data,  # 直接作为字符串传递
-                headers={"Content-Type": "application/json"},  # 手动设置请求头
-            )
+            response = requests.post(handler + "/send", json=data)
             try:
                 response_data = response.json()
                 if (

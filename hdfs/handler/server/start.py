@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import uvicorn
 import threading
 import requests
@@ -15,8 +15,9 @@ app = FastAPI()
 
 
 @app.post("/register")
-async def register(data: dict):
+async def register(request: Request):
     # register the data handler
+    data = await request.json()
     url = data.get("url", "")
     if url == "":
         return {"result": "failed", "msg": "url is empty"}
@@ -31,8 +32,10 @@ async def register(data: dict):
         "LULL": "1.462000012397766",
         "OT": "9.56700038909912",
     }
-    response = requests.post(url + "/test", json=test_data)
+    print("come from " + request.client.host)
     try:
+        response = requests.post(f"{url}/test", json=test_data)
+        print("resp.text="+response.text)
         response_data = response.json()
         if (
             response_data is None

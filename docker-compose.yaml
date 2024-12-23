@@ -71,7 +71,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVER=KAFKA:9092
     networks:
       - kafka
-      - handlers
+      - hadoop
     ports:
       - "8000:8000"
       - "50051:50051"
@@ -95,7 +95,6 @@ services:
       - mongodb
       - handler-test
     networks:
-      - handlers
       - hadoop
       
 
@@ -200,8 +199,7 @@ networks:
     driver: bridge
   kafka:
     driver: bridge
-  handlers:
-    driver: bridge
+
 
 # volumes:
 #   namenode_data:

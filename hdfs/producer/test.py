@@ -3,6 +3,7 @@ import time
 import json
 import os
 from datagen import generate_read_data
+
 # from utils import generate_csv_data  # 确保 utils 包含此函数
 
 # 连接 Kafka，并设置生产者的幂等性、重试和批处理配置
@@ -14,7 +15,7 @@ producer = KafkaProducer(
 
 # 从环境变量或默认值中获取 Kafka Topic
 city_name = os.getenv("CITY_NAME", "Hefei")  # 使用城市名称而非固定 topic
-kafka_topic = f"city"
+kafka_topic = f"example-topic"
 
 
 def emit():
@@ -30,7 +31,7 @@ def emit():
                 "city": city_name,
             },  # 包含数据和城市信息的 JSON 对象
         )
-        time.sleep(2)  # 模拟间隔发送
+        time.sleep(15)  # 模拟间隔发送
 
 
 if __name__ == "__main__":

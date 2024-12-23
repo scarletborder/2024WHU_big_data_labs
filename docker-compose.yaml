@@ -53,11 +53,50 @@ services:
         condition: service_started
       kafka:
         condition: service_started
-      namenode:
-        condition: service_healthy
+      # namenode:
+      #   condition: service_healthy
     command: ['python3', 'test.py']
     networks:
       - kafka
+    
+  # handler entry
+  handler-test:
+    build:
+      context: ./hdfs/handler
+      dockerfile: Dockerfile.test
+    profiles: ["test"]
+    container_name: handler-entry
+    environment:
+      - KAFKA_TOPIC=example-topic
+      - KAFKA_BOOTSTRAP_SERVER=KAFKA:9092
+    networks:
+      - kafka
+      - handlers
+    ports:
+      - "8000:8000"
+      - "50051:50051"
+    depends_on:
+      kafka:
+        condition: service_started
+
+  example-v2:
+    build:
+      context: ./services/examplev2
+      dockerfile: Dockerfile
+    profiles: ["test"]
+    container_name: examplev2
+    environment:
+      - MONGO_URI=mongodb://root:root@mongodb:27017
+      - REGISTER_URL=http://handler-test:8000
+    ports:
+      - "8081:8081" 
+    
+    depends_on:
+      - mongodb
+      - handler-test
+    networks:
+      - handlers
+      - hadoop
       
 
   # =================
@@ -69,7 +108,7 @@ services:
     build:
       context: ./hdfs/handler
       dockerfile: Dockerfile.test
-    profiles: ["test"]
+    profiles: ["hdfs"]
     container_name: hdfshandler_container
     environment:
       - HDFS_URI=hdfs://namenode:9000
@@ -89,6 +128,7 @@ services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
+    profiles: ["hdfs"]
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
@@ -106,6 +146,7 @@ services:
   # HDFS DataNode（支持横向扩展）
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    profiles: ["hdfs"]
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
@@ -143,7 +184,7 @@ services:
     build:
       context: ./services/example
       dockerfile: Dockerfile
-    profiles: ["test"]
+    profiles: ["hdfs"]
     container_name: user_service
     environment:
       - MONGO_URI=mongodb://root:root@mongodb:27017
@@ -158,6 +199,8 @@ networks:
   hadoop:
     driver: bridge
   kafka:
+    driver: bridge
+  handlers:
     driver: bridge
 
 # volumes:

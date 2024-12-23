@@ -6,13 +6,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/descriptor.proto";
 
 
-// 自定义 py_package 选项
-extend google.protobuf.FileOptions {
-  string py_package = 51234;
-}
-
 // 定义你的包名
-option (py_package) = "proto";
 
 service ExampleService {
   rpc GetExample (ExampleRequest) returns (ExampleResponse) {
@@ -20,6 +14,25 @@ service ExampleService {
       get: "/v1/example/{id}"
     };
   }
+
+  rpc Send (ETTRequest) returns (StandardResponse) {
+    option (google.api.http) = {
+      post: "/send"
+    };
+  }
+  
+  rpc Test(ETTRequest) returns (StandardResponse) {
+    option (google.api.http) = {
+      post: "/test"
+    };
+  }
+
+  rpc Stop(NullRequest) returns (ExampleResponse) {
+    option (google.api.http) = {
+      post: "/stop"
+    };
+  }
+
 }
 
 message ExampleRequest {
@@ -28,4 +41,22 @@ message ExampleRequest {
 
 message ExampleResponse {
   string message = 1;
+}
+
+message NullRequest {}
+
+message ETTRequest {
+  string date = 1;
+  float HUFL = 2;
+  float HULL = 3;
+  float MUFL = 4;
+  float MULL = 5;
+  float LUFL = 6;
+  float LULL = 7;
+  float OT = 8;
+}
+
+message StandardResponse {
+  string result = 1;
+  string msg = 2;
 }

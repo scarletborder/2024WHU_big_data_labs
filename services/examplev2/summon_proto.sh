@@ -15,3 +15,5 @@ python -m grpc_tools.protoc \
     --descriptor_set_out=${OUT_DIR}/descriptor.pb \
     --include_imports \
     ${PROTO_DIR}/ett.proto
+
+python fix_imports.py

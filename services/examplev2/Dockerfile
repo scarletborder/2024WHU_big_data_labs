@@ -3,14 +3,20 @@ FROM python:3.9-bookworm
 
 WORKDIR /app
 
-# 安装 kafka-python 依赖
 RUN pip install grpcio grpcio-tools grpcio-reflection googleapis-common-protos
+RUN pip install requests
 RUN pip install "fastapi[standard]"
 
 ENV PYTHONIOENCODING=utf-8
 
-
-# 复制生产者代码
 COPY . .
 
-CMD ["python3", "test.py"]
+# RUN ../../proto ./proto/
+
+# RUN ./summon_proto.sh
+
+RUN python grpc-server.py &
+
+RUN python http_server.py &
+
+CMD ["python", "main.py"]

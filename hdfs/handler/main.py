@@ -1,7 +1,7 @@
 from kafka import KafkaConsumer
 import json
 import os
-from utils.hdfs import *
+# from utils.hdfs import *
 from server.start import start_fastapi_server
 from server.handler import Send_Data
 import threading

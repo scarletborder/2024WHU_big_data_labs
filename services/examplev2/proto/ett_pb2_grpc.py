@@ -26,7 +26,9 @@ if _version_not_supported:
 
 
 class ExampleServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """定义你的包名
+
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -39,12 +41,47 @@ class ExampleServiceStub(object):
                 request_serializer=ett__pb2.ExampleRequest.SerializeToString,
                 response_deserializer=ett__pb2.ExampleResponse.FromString,
                 _registered_method=True)
+        self.Send = channel.unary_unary(
+                '/example.ExampleService/Send',
+                request_serializer=ett__pb2.ETTRequest.SerializeToString,
+                response_deserializer=ett__pb2.StandardResponse.FromString,
+                _registered_method=True)
+        self.Test = channel.unary_unary(
+                '/example.ExampleService/Test',
+                request_serializer=ett__pb2.ETTRequest.SerializeToString,
+                response_deserializer=ett__pb2.StandardResponse.FromString,
+                _registered_method=True)
+        self.Stop = channel.unary_unary(
+                '/example.ExampleService/Stop',
+                request_serializer=ett__pb2.NullRequest.SerializeToString,
+                response_deserializer=ett__pb2.ExampleResponse.FromString,
+                _registered_method=True)
 
 
 class ExampleServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """定义你的包名
+
+    """
 
     def GetExample(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Send(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Test(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Stop(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -58,6 +95,21 @@ def add_ExampleServiceServicer_to_server(servicer, server):
                     request_deserializer=ett__pb2.ExampleRequest.FromString,
                     response_serializer=ett__pb2.ExampleResponse.SerializeToString,
             ),
+            'Send': grpc.unary_unary_rpc_method_handler(
+                    servicer.Send,
+                    request_deserializer=ett__pb2.ETTRequest.FromString,
+                    response_serializer=ett__pb2.StandardResponse.SerializeToString,
+            ),
+            'Test': grpc.unary_unary_rpc_method_handler(
+                    servicer.Test,
+                    request_deserializer=ett__pb2.ETTRequest.FromString,
+                    response_serializer=ett__pb2.StandardResponse.SerializeToString,
+            ),
+            'Stop': grpc.unary_unary_rpc_method_handler(
+                    servicer.Stop,
+                    request_deserializer=ett__pb2.NullRequest.FromString,
+                    response_serializer=ett__pb2.ExampleResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'example.ExampleService', rpc_method_handlers)
@@ -67,7 +119,9 @@ def add_ExampleServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class ExampleService(object):
-    """Missing associated documentation comment in .proto file."""
+    """定义你的包名
+
+    """
 
     @staticmethod
     def GetExample(request,
@@ -85,6 +139,87 @@ class ExampleService(object):
             target,
             '/example.ExampleService/GetExample',
             ett__pb2.ExampleRequest.SerializeToString,
+            ett__pb2.ExampleResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Send(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/example.ExampleService/Send',
+            ett__pb2.ETTRequest.SerializeToString,
+            ett__pb2.StandardResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Test(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/example.ExampleService/Test',
+            ett__pb2.ETTRequest.SerializeToString,
+            ett__pb2.StandardResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Stop(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/example.ExampleService/Stop',
+            ett__pb2.NullRequest.SerializeToString,
             ett__pb2.ExampleResponse.FromString,
             options,
             channel_credentials,

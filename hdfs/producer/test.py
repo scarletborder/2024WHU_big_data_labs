@@ -2,7 +2,8 @@ from kafka import KafkaProducer
 import time
 import json
 import os
-from utils import generate_csv_data  # 确保 utils 包含此函数
+from datagen import generate_read_data
+# from utils import generate_csv_data  # 确保 utils 包含此函数
 
 # 连接 Kafka，并设置生产者的幂等性、重试和批处理配置
 producer = KafkaProducer(
@@ -17,8 +18,7 @@ kafka_topic = f"city"
 
 
 def emit():
-    for i in range(100):
-        send_data = generate_csv_data()  # 假设生成的数据是字符串格式
+    for send_data in generate_read_data("example/ETTh1.csv"):
         print(f"send message {send_data}")
 
         # 将数据打包为 JSON 格式，并指定城市名称作为分区键

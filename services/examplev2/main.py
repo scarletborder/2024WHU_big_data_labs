@@ -1,27 +1,19 @@
-from fastapi import FastAPI, HTTPException
-import grpc
-import proto.ett_pb2 as example_pb2
-import proto.ett_pb2_grpc as example_pb2_grpc
-import uvicorn
+# 向env中得到的REGISTER_URL发送http请求
 
-# 初始化 FastAPI
-app = FastAPI()
+import requests
+import os
 
-# 配置 gRPC 客户端
-channel = grpc.insecure_channel("localhost:50051")
-stub = example_pb2_grpc.ExampleServiceStub(channel)
+REGISTER_URI = os.getenv("REGISTER_URL", "")
 
 
-@app.get("/v1/example/{id}")
-async def get_example(id: str):
-    try:
-        # 转发 HTTP 请求到 gRPC
-        grpc_request = example_pb2.ExampleRequest(id=id)
-        grpc_response = stub.GetExample(grpc_request)
-        return {"message": grpc_response.message}
-    except grpc.RpcError as e:
-        raise HTTPException(status_code=500, detail=f"gRPC error: {e.details()}")
+def register(url):
+    print("attempt to register " + url)
+    response = requests.post(url + "/register", json={"url": "http://example-v2:8081"})
+    print(response.text)
 
 
-# 运行 FastAPI 应用
-uvicorn.run(app, host="0.0.0.0", port=8964)
+if __name__ == "__main__":
+    if REGISTER_URI != "":
+        register(REGISTER_URI)
+    else:
+        print("no uri")

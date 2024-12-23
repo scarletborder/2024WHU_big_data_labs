@@ -26,20 +26,31 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tett.proto\x12\x07\x65xample\x1a\x1cgoogle/api/annotations.proto\x1a google/protobuf/descriptor.proto\"\x1c\n\x0e\x45xampleRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\"\n\x0f\x45xampleResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2k\n\x0e\x45xampleService\x12Y\n\nGetExample\x12\x17.example.ExampleRequest\x1a\x18.example.ExampleResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/example/{id}:2\n\npy_package\x12\x1c.google.protobuf.FileOptions\x18\xa2\x90\x03 \x01(\tB\t\x92\x82\x19\x05protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tett.proto\x12\x07\x65xample\x1a\x1cgoogle/api/annotations.proto\x1a google/protobuf/descriptor.proto\"\x1c\n\x0e\x45xampleRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\"\n\x0f\x45xampleResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\r\n\x0bNullRequest\"z\n\nETTRequest\x12\x0c\n\x04\x64\x61te\x18\x01 \x01(\t\x12\x0c\n\x04HUFL\x18\x02 \x01(\x02\x12\x0c\n\x04HULL\x18\x03 \x01(\x02\x12\x0c\n\x04MUFL\x18\x04 \x01(\x02\x12\x0c\n\x04MULL\x18\x05 \x01(\x02\x12\x0c\n\x04LUFL\x18\x06 \x01(\x02\x12\x0c\n\x04LULL\x18\x07 \x01(\x02\x12\n\n\x02OT\x18\x08 \x01(\x02\"/\n\x10StandardResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\x0b\n\x03msg\x18\x02 \x01(\t2\xc0\x02\n\x0e\x45xampleService\x12Y\n\nGetExample\x12\x17.example.ExampleRequest\x1a\x18.example.ExampleResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/example/{id}\x12\x45\n\x04Send\x12\x13.example.ETTRequest\x1a\x19.example.StandardResponse\"\r\x82\xd3\xe4\x93\x02\x07\"\x05/send\x12\x45\n\x04Test\x12\x13.example.ETTRequest\x1a\x19.example.StandardResponse\"\r\x82\xd3\xe4\x93\x02\x07\"\x05/test\x12\x45\n\x04Stop\x12\x14.example.NullRequest\x1a\x18.example.ExampleResponse\"\r\x82\xd3\xe4\x93\x02\x07\"\x05/stopb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'ett_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'\222\202\031\005proto'
+  DESCRIPTOR._loaded_options = None
   _globals['_EXAMPLESERVICE'].methods_by_name['GetExample']._loaded_options = None
   _globals['_EXAMPLESERVICE'].methods_by_name['GetExample']._serialized_options = b'\202\323\344\223\002\022\022\020/v1/example/{id}'
+  _globals['_EXAMPLESERVICE'].methods_by_name['Send']._loaded_options = None
+  _globals['_EXAMPLESERVICE'].methods_by_name['Send']._serialized_options = b'\202\323\344\223\002\007\"\005/send'
+  _globals['_EXAMPLESERVICE'].methods_by_name['Test']._loaded_options = None
+  _globals['_EXAMPLESERVICE'].methods_by_name['Test']._serialized_options = b'\202\323\344\223\002\007\"\005/test'
+  _globals['_EXAMPLESERVICE'].methods_by_name['Stop']._loaded_options = None
+  _globals['_EXAMPLESERVICE'].methods_by_name['Stop']._serialized_options = b'\202\323\344\223\002\007\"\005/stop'
   _globals['_EXAMPLEREQUEST']._serialized_start=86
   _globals['_EXAMPLEREQUEST']._serialized_end=114
   _globals['_EXAMPLERESPONSE']._serialized_start=116
   _globals['_EXAMPLERESPONSE']._serialized_end=150
-  _globals['_EXAMPLESERVICE']._serialized_start=152
-  _globals['_EXAMPLESERVICE']._serialized_end=259
+  _globals['_NULLREQUEST']._serialized_start=152
+  _globals['_NULLREQUEST']._serialized_end=165
+  _globals['_ETTREQUEST']._serialized_start=167
+  _globals['_ETTREQUEST']._serialized_end=289
+  _globals['_STANDARDRESPONSE']._serialized_start=291
+  _globals['_STANDARDRESPONSE']._serialized_end=338
+  _globals['_EXAMPLESERVICE']._serialized_start=341
+  _globals['_EXAMPLESERVICE']._serialized_end=661
 # @@protoc_insertion_point(module_scope)
